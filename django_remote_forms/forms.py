@@ -1,8 +1,8 @@
+import json
 from collections import OrderedDict
 
 from django_remote_forms import fields, logger
 from django_remote_forms.utils import resolve_promise
-import json
 
 
 class RemoteForm(object):
@@ -20,23 +20,33 @@ class RemoteForm(object):
 
         # Make sure all passed field lists are valid
         if self.excluded_fields and not (self.all_fields >= self.excluded_fields):
-            logger.warning('Excluded fields %s are not present in form fields' % (self.excluded_fields - self.all_fields))
+            logger.warning('Excluded fields {} are not present in form fields'.format(
+                self.excluded_fields - self.all_fields)
+            )
             self.excluded_fields = set()
 
         if self.included_fields and not (self.all_fields >= self.included_fields):
-            logger.warning('Included fields %s are not present in form fields' % (self.included_fields - self.all_fields))
+            logger.warning('Included fields {} are not present in form fields'.format(
+                self.included_fields - self.all_fields)
+            )
             self.included_fields = set()
 
         if self.readonly_fields and not (self.all_fields >= self.readonly_fields):
-            logger.warning('Readonly fields %s are not present in form fields' % (self.readonly_fields - self.all_fields))
+            logger.warning('Readonly fields {} are not present in form fields'.format(
+                self.readonly_fields - self.all_fields)
+            )
             self.readonly_fields = set()
 
         if self.ordered_fields and not (self.all_fields >= set(self.ordered_fields)):
-            logger.warning('Readonly fields %s are not present in form fields' % (set(self.ordered_fields) - self.all_fields))
+            logger.warning('Readonly fields {} are not present in form fields'.format(
+                set(self.ordered_fields) - self.all_fields)
+            )
             self.ordered_fields = []
 
         if self.included_fields | self.excluded_fields:
-            logger.warning('Included and excluded fields have following fields %s in common' % (set(self.ordered_fields) - self.all_fields))
+            logger.warning('Included and excluded fields have following fields {} in common'.format(
+                set(self.ordered_fields) - self.all_fields)
+            )
             self.excluded_fields = set()
             self.included_fields = set()
 
@@ -66,11 +76,11 @@ class RemoteForm(object):
                     fieldset_fields |= set(fieldsets_data['fields'])
 
         if not (self.all_fields >= fieldset_fields):
-            logger.warning('Following fieldset fields are invalid %s' % (fieldset_fields - self.all_fields))
+            logger.warning('Following fieldset fields are invalid {}'.format(fieldset_fields - self.all_fields))
             self.fieldsets = {}
 
         if not (set(self.fields) >= fieldset_fields):
-            logger.warning('Following fieldset fields are excluded %s' % (fieldset_fields - set(self.fields)))
+            logger.warning('Following fieldset fields are excluded {}'.format(fieldset_fields - set(self.fields)))
             self.fieldsets = {}
 
     def as_dict(self):
@@ -132,12 +142,12 @@ class RemoteForm(object):
 
             # Instantiate the Remote Forms equivalent of the field if possible
             # in order to retrieve the field contents as a dictionary.
-            remote_field_class_name = 'Remote%s' % field.__class__.__name__
+            remote_field_class_name = 'Remote{}'.format(field.__class__.__name__)
             try:
                 remote_field_class = getattr(fields, remote_field_class_name)
                 remote_field = remote_field_class(field, form_initial_field_data, field_name=name)
-            except Exception, e:
-                logger.warning('Error serializing field %s: %s', remote_field_class_name, str(e))
+            except Exception as e:
+                logger.warning('Error serializing field {}: {}'.format(remote_field_class_name, str(e)))
                 field_dict = {}
             else:
                 field_dict = remote_field.as_dict()

@@ -1,5 +1,4 @@
 import datetime
-
 from collections import OrderedDict
 
 from django.conf import settings
@@ -36,12 +35,12 @@ class RemoteField(object):
 
         # Instantiate the Remote Forms equivalent of the widget if possible
         # in order to retrieve the widget contents as a dictionary.
-        remote_widget_class_name = 'Remote%s' % self.field.widget.__class__.__name__
+        remote_widget_class_name = 'Remote{}'.format(self.field.widget.__class__.__name__)
         try:
             remote_widget_class = getattr(widgets, remote_widget_class_name)
             remote_widget = remote_widget_class(self.field.widget, field_name=self.field_name)
-        except Exception, e:
-            logger.warning('Error serializing %s: %s', remote_widget_class_name, str(e))
+        except Exception as e:
+            logger.warning('Error serializing {}: {}'.format(remote_widget_class_name, str(e)))
             widget_dict = {}
         else:
             widget_dict = remote_widget.as_dict()
@@ -53,7 +52,7 @@ class RemoteField(object):
 
 class RemoteCharField(RemoteField):
     def as_dict(self):
-        field_dict = super(RemoteCharField, self).as_dict()
+        field_dict = super().as_dict()
 
         field_dict.update({
             'max_length': self.field.max_length,
@@ -65,7 +64,7 @@ class RemoteCharField(RemoteField):
 
 class RemoteTagField(RemoteField):
     def as_dict(self):
-        field_dict = super(RemoteTagField, self).as_dict()
+        field_dict = super().as_dict()
 
         field_dict.update({
             'max_length': self.field.max_length,
@@ -74,13 +73,12 @@ class RemoteTagField(RemoteField):
         if field_dict['initial']:
             field_dict['initial'] = ",".join(str(tag.tag) for tag in field_dict['initial'])
 
-
         return field_dict
 
 
 class RemoteIntegerField(RemoteField):
     def as_dict(self):
-        field_dict = super(RemoteIntegerField, self).as_dict()
+        field_dict = super().as_dict()
 
         field_dict.update({
             'max_value': self.field.max_value,
@@ -92,12 +90,12 @@ class RemoteIntegerField(RemoteField):
 
 class RemoteFloatField(RemoteIntegerField):
     def as_dict(self):
-        return super(RemoteFloatField, self).as_dict()
+        return super().as_dict()
 
 
 class RemoteDecimalField(RemoteIntegerField):
     def as_dict(self):
-        field_dict = super(RemoteDecimalField, self).as_dict()
+        field_dict = super().as_dict()
 
         field_dict.update({
             'max_digits': self.field.max_digits,
@@ -109,16 +107,16 @@ class RemoteDecimalField(RemoteIntegerField):
 
 class RemoteTimeField(RemoteField):
     def as_dict(self):
-        field_dict = super(RemoteTimeField, self).as_dict()
+        field_dict = super().as_dict()
 
         field_dict['input_formats'] = self.field.input_formats
 
-        if (field_dict['initial']):
+        if field_dict['initial']:
             if callable(field_dict['initial']):
                 field_dict['initial'] = field_dict['initial']()
 
             # If initial value is datetime then convert it using first available input format
-            if (isinstance(field_dict['initial'], (datetime.datetime, datetime.time, datetime.date))):
+            if isinstance(field_dict['initial'], (datetime.datetime, datetime.time, datetime.date)):
                 if not len(field_dict['input_formats']):
                     if isinstance(field_dict['initial'], datetime.date):
                         field_dict['input_formats'] = settings.DATE_INPUT_FORMATS
@@ -135,17 +133,17 @@ class RemoteTimeField(RemoteField):
 
 class RemoteDateField(RemoteTimeField):
     def as_dict(self):
-        return super(RemoteDateField, self).as_dict()
+        return super().as_dict()
 
 
 class RemoteDateTimeField(RemoteTimeField):
     def as_dict(self):
-        return super(RemoteDateTimeField, self).as_dict()
+        return super().as_dict()
 
 
 class RemoteRegexField(RemoteCharField):
     def as_dict(self):
-        field_dict = super(RemoteRegexField, self).as_dict()
+        field_dict = super().as_dict()
 
         # We don't need the pattern object in the frontend
         # field_dict['regex'] = self.field.regex
@@ -155,12 +153,12 @@ class RemoteRegexField(RemoteCharField):
 
 class RemoteEmailField(RemoteCharField):
     def as_dict(self):
-        return super(RemoteEmailField, self).as_dict()
+        return super().as_dict()
 
 
 class RemoteFileField(RemoteField):
     def as_dict(self):
-        field_dict = super(RemoteFileField, self).as_dict()
+        field_dict = super().as_dict()
 
         field_dict['max_length'] = self.field.max_length
 
@@ -169,27 +167,27 @@ class RemoteFileField(RemoteField):
 
 class RemoteImageField(RemoteFileField):
     def as_dict(self):
-        return super(RemoteImageField, self).as_dict()
+        return super().as_dict()
 
 
 class RemoteURLField(RemoteCharField):
     def as_dict(self):
-        return super(RemoteURLField, self).as_dict()
+        return super().as_dict()
 
 
 class RemoteBooleanField(RemoteField):
     def as_dict(self):
-        return super(RemoteBooleanField, self).as_dict()
+        return super().as_dict()
 
 
 class RemoteNullBooleanField(RemoteBooleanField):
     def as_dict(self):
-        return super(RemoteNullBooleanField, self).as_dict()
+        return super().as_dict()
 
 
 class RemoteChoiceField(RemoteField):
     def as_dict(self):
-        field_dict = super(RemoteChoiceField, self).as_dict()
+        field_dict = super().as_dict()
 
         field_dict['choices'] = []
         for key, value in self.field.choices:
@@ -203,12 +201,12 @@ class RemoteChoiceField(RemoteField):
 
 class RemoteModelChoiceField(RemoteChoiceField):
     def as_dict(self):
-        return super(RemoteModelChoiceField, self).as_dict()
+        return super().as_dict()
 
 
 class RemoteTypedChoiceField(RemoteChoiceField):
     def as_dict(self):
-        field_dict = super(RemoteTypedChoiceField, self).as_dict()
+        field_dict = super().as_dict()
 
         field_dict.update({
             'coerce': self.field.coerce,
@@ -220,17 +218,17 @@ class RemoteTypedChoiceField(RemoteChoiceField):
 
 class RemoteMultipleChoiceField(RemoteChoiceField):
     def as_dict(self):
-        return super(RemoteMultipleChoiceField, self).as_dict()
+        return super().as_dict()
 
 
 class RemoteModelMultipleChoiceField(RemoteMultipleChoiceField):
     def as_dict(self):
-        return super(RemoteModelMultipleChoiceField, self).as_dict()
+        return super().as_dict()
 
 
 class RemoteTypedMultipleChoiceField(RemoteMultipleChoiceField):
     def as_dict(self):
-        field_dict = super(RemoteTypedMultipleChoiceField, self).as_dict()
+        field_dict = super().as_dict()
 
         field_dict.update({
             'coerce': self.field.coerce,
@@ -242,7 +240,7 @@ class RemoteTypedMultipleChoiceField(RemoteMultipleChoiceField):
 
 class RemoteComboField(RemoteField):
     def as_dict(self):
-        field_dict = super(RemoteComboField, self).as_dict()
+        field_dict = super().as_dict()
 
         field_dict.update(fields=self.field.fields)
 
@@ -251,7 +249,7 @@ class RemoteComboField(RemoteField):
 
 class RemoteMultiValueField(RemoteField):
     def as_dict(self):
-        field_dict = super(RemoteMultiValueField, self).as_dict()
+        field_dict = super().as_dict()
 
         field_dict['fields'] = self.field.fields
 
@@ -260,7 +258,7 @@ class RemoteMultiValueField(RemoteField):
 
 class RemoteFilePathField(RemoteChoiceField):
     def as_dict(self):
-        field_dict = super(RemoteFilePathField, self).as_dict()
+        field_dict = super().as_dict()
 
         field_dict.update({
             'path': self.field.path,
@@ -273,7 +271,7 @@ class RemoteFilePathField(RemoteChoiceField):
 
 class RemoteSplitDateTimeField(RemoteMultiValueField):
     def as_dict(self):
-        field_dict = super(RemoteSplitDateTimeField, self).as_dict()
+        field_dict = super().as_dict()
 
         field_dict.update({
             'input_date_formats': self.field.input_date_formats,
@@ -285,9 +283,9 @@ class RemoteSplitDateTimeField(RemoteMultiValueField):
 
 class RemoteIPAddressField(RemoteCharField):
     def as_dict(self):
-        return super(RemoteIPAddressField, self).as_dict()
+        return super().as_dict()
 
 
 class RemoteSlugField(RemoteCharField):
     def as_dict(self):
-        return super(RemoteSlugField, self).as_dict()
+        return super().as_dict()
